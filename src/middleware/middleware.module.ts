@@ -5,13 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]),PassportModule,JwtModule.register({
-    secret: "MY_SECRET_KEY",
-  }), ],
+  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forFeature([User]),
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.MY_SECRET_KEY,
+    }),
+  ],
   providers: [MiddlewareService],
-  controllers: [MiddlewareController]
+  controllers: [MiddlewareController],
 })
 export class MiddlewareModule {}

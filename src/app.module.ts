@@ -8,13 +8,17 @@ import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { MiddlewareModule } from './middleware/middleware.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
+import { PassportModule } from '@nestjs/passport';
 
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: "postgres",
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME,
@@ -23,10 +27,12 @@ import { ConfigModule } from '@nestjs/config';
       entities: [Book, User],
       synchronize: true,
     }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     BookModule,
     UserModule,
-    MiddlewareModule],
-  controllers: [AppController],
-  providers: [AppService],
+    MiddlewareModule,
+    AuthModule],
+  controllers: [AppController, AuthController],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}

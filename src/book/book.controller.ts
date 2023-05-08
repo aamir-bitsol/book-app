@@ -9,32 +9,47 @@ import {
 } from '@nestjs/common';
 import { CreateBookDto, UpdateBookDto } from './book.dto';
 import { BookService } from './book.service';
+import { ApiTags, ApiResponse, ApiOperation, ApiProperty, ApiParam } from '@nestjs/swagger';
 
+@ApiTags("Book")
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all books' })
+  @ApiResponse({ status: 200, description: 'Returns an array of books' })
   getBooks(): Promise<any[]> {
     return this.bookService.getAllBooks();
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new book' })
+  @ApiResponse({ status: 201, description: 'This API will create a new book' })
   createBook(@Body() book: CreateBookDto): Promise<any> {
     return this.bookService.createBook(book);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a specific book' })
+  @ApiResponse({ status: 200, description: 'Returns a specific book' })
+  @ApiParam({name: "id", required: true, description: "Integer value to get the specific book"})
   getSpecificBook(@Param('id') id: number): Promise<any> {
     return this.bookService.getSpecificBook(id);
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update the specific book details' })
+  @ApiResponse({ status: 200, description: 'This API will update the details of specific book'})
+  @ApiParam({name: "id", required: true, description: "Integer value to update the specific book"})
   updateBook(@Param() param: any, @Body() book: UpdateBookDto): Promise<any> {
     return this.bookService.updateBook(param.id, book);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a book' })
+  @ApiResponse({ status: 200, description: 'This API will remove a book' })
+  @ApiParam({name: "id", required: true, description: "Integer value to delete the specific book"})
   deleteBook(@Param('id') id: number): Promise<any> {
     return this.bookService.deleteBook(id);
   }
