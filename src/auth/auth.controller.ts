@@ -4,9 +4,11 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService:AuthService){}
-    @Post('signin')
-    signIn(@Body() authCredentialsDto: AuthCredentialsDto): Promise<{message: string}>{
-        return this.authService.signIn(authCredentialsDto);
-    }
+  constructor(private readonly authService: AuthService) {}
+  @Post('signin')
+  signIn(
+    @Body() authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ message: string }> {
+    return this.authService.signIn(authCredentialsDto);
+  }
 }

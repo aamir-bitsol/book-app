@@ -14,7 +14,7 @@ export class MiddlewareService {
             const {password, ...rest} = user;
             return rest;
         }
-        return null;
+        return {message:"Something went wrong"};
     }
 
 }

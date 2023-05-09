@@ -12,6 +12,10 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
+import { CollectionController } from './collection/collection.controller';
+import { CollectionService } from './collection/collection.service';
+import { CollectionModule } from './collection/collection.module';
+import { Collection } from './collection/collection.entity';
 
 
 @Module({
@@ -24,15 +28,16 @@ import { PassportModule } from '@nestjs/passport';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Book, User],
+      entities: [Book, User, Collection],
       synchronize: true,
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     BookModule,
     UserModule,
     MiddlewareModule,
-    AuthModule],
-  controllers: [AppController, AuthController],
-  providers: [AppService, AuthService],
+    AuthModule,
+    CollectionModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Delete } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -12,7 +12,25 @@ export class UserService {
   ) {}
 
   async createUser(user: CreateUserDto): Promise<any> {
-    return await this.userRepository.create(user);
+    try {
+      const userObj: User = new User();
+      for (const key in user) {
+        if (user.hasOwnProperty(key)) {
+          userObj[key] = user[key];
+        }
+      }
+      return {
+        success: true,
+        error: false,
+        result:await this.userRepository.save(userObj)
+      };
+    } catch (err) {
+      return { 
+        success: false,
+        error: true,
+        message: err.detail
+       };
+    }
   }
 
   async getAllUsers(): Promise<any[]> {
@@ -20,20 +38,51 @@ export class UserService {
   }
 
   async getSpecificUser(id: number): Promise<any> {
-    return await this.userRepository.findOne({ where: { id } });
+    try {
+      const user:User = await this.userRepository.findOne({where:{id}});
+      return {
+        success: true,
+        error: false,
+        result:user
+      };
+    } catch (err) {
+      return { 
+        success: false,
+        error: true,
+        message: err.detail 
+      };
+    }
   }
 
   async updateUser(id: number, user: UpdateUserDto): Promise<any> {
-    const userObj: User = await this.userRepository.findOne({ where: { id } });
-    for (const key in user) {
-      if (user.hasOwnProperty(key)) {
-        userObj[key] = user[key];
+    try {
+      const userObj: User = await this.userRepository.findOne({
+        where: { id },
+      });
+      for (const key in user) {
+        if (user.hasOwnProperty(key)) {
+          userObj[key] = user[key];
+        }
       }
+      return await this.userRepository.save(userObj);
+    } catch (err) {
+      return { 
+        success: false,
+        error: true,
+        message: err.detail
+       };
     }
-    return await this.userRepository.save(userObj);
   }
 
-  async deleteUser(id: number) {
-    return await this.userRepository.delete({ id });
+  async deleteUser(id: number): Promise<any> {
+    try {
+      return await this.userRepository.delete(id);
+    } catch (err) {
+      return { 
+        success: false,
+        error: true,
+        message: err.detail 
+      };
+    }
   }
 }

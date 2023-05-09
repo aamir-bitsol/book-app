@@ -8,8 +8,8 @@ import { User } from 'src/user/user.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
     TypeOrmModule.forFeature([User]),
+    ConfigModule.forRoot(),
     JwtModule.register({
       secret: process.env.MY_SECRET_KEY,
     }),

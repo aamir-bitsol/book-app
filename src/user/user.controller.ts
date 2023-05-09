@@ -17,6 +17,7 @@ import {
   ApiResponse,
   ApiOperation,
   ApiParam,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('User')
@@ -36,20 +37,20 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Get a specific users' })
+  @ApiBadRequestResponse({ description: 'Invalid user ID' , status: 400})
   @ApiResponse({ status: 200, description: 'Returns a single users' })
   @ApiParam({name: "id", required: true, description: "Integer value to get the specific user."})
   @Get(':id')
   async getSpecificUser(@Res() res: Response, @Param('id') id: number) {
     const user: User = await this.userService.getSpecificUser(id);
-    return res.status(202).json({
-      success: true,
-      error: false,
+    return res.status(200).json({
       data: user,
     });
   }
 
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'This API will create a user.' })
+  @ApiBadRequestResponse({ description: 'Request Data is incomplete. Please double check the data for user.' , status: 400})
   @Post()
   async createUser(
     @Res() res: Response,
@@ -57,8 +58,6 @@ export class UserController {
   ): Promise<any> {
     const data: User = await this.userService.createUser(user);
     return res.status(201).json({
-      success: true,
-      error: false,
       data: data,
     });
   }
@@ -73,8 +72,6 @@ export class UserController {
   ): Promise<any> {
     const deleted_user = await this.userService.deleteUser(id);
     return res.status(202).json({
-      success: true,
-      error: false,
       data: deleted_user,
     });
   }

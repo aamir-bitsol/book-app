@@ -8,8 +8,8 @@ import { User } from '../user/user.entity';
 @Injectable()
 export class AuthService {
   constructor(
-    // @InjectRepository(User)
-    // private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
   async signIn(
@@ -17,8 +17,7 @@ export class AuthService {
   ): Promise<{ message: string }> {
     const username = authCredentialsDto.username;
     const password = authCredentialsDto.password;
-    // const user: User = await this.userRepository.findOne({where:{username}});
-    const user = {username, password:"pass", id:1} // this is temporary user to run the code
+    const user: User = await this.userRepository.findOne({where:{username}});
     if (!user) {
       return { message: 'Incorrect credentials!' };
     }
