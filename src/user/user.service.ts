@@ -1,4 +1,4 @@
-import { Injectable, Delete } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -22,67 +22,103 @@ export class UserService {
       return {
         success: true,
         error: false,
-        result:await this.userRepository.save(userObj)
+        result: await this.userRepository.save(userObj),
       };
     } catch (err) {
-      return { 
+      return {
         success: false,
         error: true,
-        message: err.detail
-       };
+        message: err.detail,
+      };
     }
   }
 
-  async getAllUsers(): Promise<any[]> {
-    return await this.userRepository.find();
+  async getAllUsers(): Promise<any> {
+    const allUsers: User[] = await this.userRepository.find();
+    if (allUsers.length == 0) {
+      throw new HttpException(
+        { success: false, error: true, message: 'No Data Available' },
+        400,
+      );
+    }
+    return {success: true, error: false, message: allUsers};
   }
 
   async getSpecificUser(id: number): Promise<any> {
-    try {
-      const user:User = await this.userRepository.findOne({where:{id}});
-      return {
-        success: true,
-        error: false,
-        result:user
-      };
-    } catch (err) {
-      return { 
-        success: false,
-        error: true,
-        message: err.detail 
-      };
+    const user: User = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Unable to find the User',
+        },
+        400,
+      );
     }
+    return {
+      success: true,
+      error: false,
+      message: user,
+    };
+  }
+
+  async getSpecificUserByUsername(username: string): Promise<any> {
+    const user: User = await this.userRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Unable to find the User',
+        },
+        400,
+      );
+    }
+    return {
+      success: true,
+      error: false,
+      message: user,
+    };
   }
 
   async updateUser(id: number, user: UpdateUserDto): Promise<any> {
-    try {
-      const userObj: User = await this.userRepository.findOne({
-        where: { id },
-      });
-      for (const key in user) {
-        if (user.hasOwnProperty(key)) {
-          userObj[key] = user[key];
-        }
-      }
-      return await this.userRepository.save(userObj);
-    } catch (err) {
-      return { 
-        success: false,
-        error: true,
-        message: err.detail
-       };
+    const userObj: User = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!userObj) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Invalid User ID' },
+        400,
+      );
     }
+    for (const key in user) {
+      if (user.hasOwnProperty(key)) {
+        userObj[key] = user[key];
+      }
+    }
+    return {
+      success: true,
+      error: false,
+      message: await this.userRepository.save(userObj),
+    };
   }
 
   async deleteUser(id: number): Promise<any> {
-    try {
-      return await this.userRepository.delete(id);
-    } catch (err) {
-      return { 
-        success: false,
-        error: true,
-        message: err.detail 
-      };
+    const findUser: User = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!findUser) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Unable to remove User' },
+        400,
+      );
     }
+    const user: any = await this.userRepository.delete(id);
+    return {
+      success: true,
+      error: false,
+      message: user,
+    };
   }
 }

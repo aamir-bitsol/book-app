@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { Book } from './book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,13 +17,41 @@ export class BookService {
     return await this.bookRepository.save(bookObj);
   }
 
-  async getAllBooks(): Promise<any[]> {
-    return await this.bookRepository.find();
+  async getAllBooks(): Promise<any> {
+    const allBooks: Book[] = await this.bookRepository.find();
+    if (allBooks.length == 0) {
+      throw new HttpException(
+        { success: false, error: true, message: 'No Data Available' },
+        400,
+      );
+    }
+    return {success: true, error: false, message: allBooks};
   }
 
-  async getSpecificBook(id: number): Promise<any> {
+  async getBookById(id: number): Promise<any> {
+    const collection: Book = await this.bookRepository.findOne({
+      where: { id },
+    });
+    if (!collection) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Unable to find the book',
+        },
+        400,
+      );
+    }
+    return {
+      success: true,
+      error: false,
+      message: collection,
+    };
+  }
+
+  async getBookByTitle(title:string): Promise<any> {
     try{
-      return await this.bookRepository.findOne({ where: { id } });
+      return await this.bookRepository.find({ where: { title } });
     }
     catch(err){
       return {message: err.detail}
@@ -31,13 +59,42 @@ export class BookService {
   }
 
   async updateBook(id: number, book: UpdateBookDto): Promise<any> {
-    const bookObj: any = await this.bookRepository.findOne({ where: { id } });
-    bookObj.title = book.title;
-    bookObj.author = book.author;
-    return await this.bookRepository.save(bookObj);
+    const bookObj: Book = await this.bookRepository.findOne({
+      where: { id },
+    });
+    if (!bookObj) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Invalid User ID' },
+        400,
+      );
+    }
+    for (const key in bookObj) {
+      if (book.hasOwnProperty(key)) {
+        bookObj[key] = book[key];
+      }
+    }
+    return {
+      success: true,
+      error: false,
+      message: await this.bookRepository.save(bookObj),
+    };
   }
 
-  async deleteBook(id: number) {
-    return await this.bookRepository.delete({ id });
+  async deleteBook(id: number): Promise<any> {
+    const findBook: Book = await this.bookRepository.findOne({
+      where: { id },
+    });
+    if (!findBook) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Unable to remove Book' },
+        400,
+      );
+    }
+    const book: any = await this.bookRepository.delete(id);
+    return {
+      success: true,
+      error: false,
+      message: book,
+    };
   }
 }

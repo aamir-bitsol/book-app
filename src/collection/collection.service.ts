@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Collection } from './collection.entity';
@@ -17,18 +17,28 @@ export class CollectionService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async getAllCollections() {
-    return await this.collectionRepo.find();
+  async getAllCollections(): Promise<any> {
+    const allCollections: Collection[] = await this.collectionRepo.find();
+    if (allCollections.length == 0) {
+      throw new HttpException(
+        { success: false, error: true, message: 'No Data Available' },
+        200,
+      );
+    }
+    return {success: true, error: false, message: allCollections};
   }
 
-  async createCollection(collectionData: CreateCollectionDTO) {
+  async createCollection(collectionData: CreateCollectionDTO): Promise<any> {
     const user_id: number = collectionData.user_id;
     const book_id: number = collectionData.book_id;
     const user: User = await this.userRepo.findOne({ where: { id: user_id } });
     const book: Book = await this.bookRepo.findOne({ where: { id: book_id } });
 
     if (!user || !book) {
-      return { message: 'Invalid book or user Id' };
+      return new HttpException(
+        { success: false, error: true, message: 'Invalid book or user Id' },
+        400,
+      );
     }
 
     const data_exists = await this.collectionRepo.findOne({
@@ -36,23 +46,80 @@ export class CollectionService {
     });
 
     if (data_exists) {
-      return { 
-        success: true,
-        error: false,
-        message: 'Data already exists' };
+      throw new HttpException(
+        { success: false, error: true, message: 'Data already exists' },
+        400,
+      );
     }
 
     const collection: Collection = await this.collectionRepo.save(
       collectionData,
     );
-    return { message: collection };
+    return {
+      success: true,
+      error: false,
+      message: collection,
+    };
   }
 
-  async getSpecificCollection(id: number) {
-    return await this.collectionRepo.find({ where: { id } });
+  async getSpecificCollection(id: number): Promise<any> {
+    const collection: Collection = await this.collectionRepo.findOne({
+      where: { id },
+    });
+    if (!collection) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Unable to find the collection',
+        },
+        400,
+      );
+    }
+    return {
+      success: true,
+      error: false,
+      message: collection,
+    };
   }
 
-  async deleteCollection(id: number) {
-    return await this.collectionRepo.delete(id);
+  async updateCollection(id, data){
+    const collectionObj: Collection = await this.collectionRepo.findOne({
+      where: { id },
+    });
+    if (!collectionObj) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Invalid Collection ID' },
+        400,
+      );
+    }
+    for (const key in collectionObj) {
+      if (data.hasOwnProperty(key)) {
+        collectionObj[key] = data[key];
+      }
+    }
+    return {
+      success: true,
+      error: false,
+      message: await this.collectionRepo.save(collectionObj),
+    };
+  }
+
+  async deleteCollection(id: number): Promise<any> {
+    const findCollection: Collection = await this.collectionRepo.findOne({
+      where: { id },
+    });
+    if (!findCollection) {
+      throw new HttpException(
+        { success: false, error: true, message: 'Unable to remove Collection' },
+        400,
+      );
+    }
+    const collection: any = await this.collectionRepo.delete(id);
+    return {
+      success: true,
+      error: false,
+      message: collection,
+    };
   }
 }
