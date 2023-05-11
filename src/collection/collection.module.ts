@@ -7,7 +7,7 @@ import { User } from 'src/user/user.entity';
 import { Book } from 'src/book/book.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Collection]), TypeOrmModule.forFeature([Book]), TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([Collection, Book, User])],
   controllers: [CollectionController],
   providers: [CollectionService],
 })

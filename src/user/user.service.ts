@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
 import { User } from './user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -12,25 +13,28 @@ export class UserService {
   ) {}
 
   async createUser(user: CreateUserDto): Promise<any> {
-    try {
-      const userObj: User = new User();
-      for (const key in user) {
-        if (user.hasOwnProperty(key)) {
-          userObj[key] = user[key];
-        }
-      }
-      return {
-        success: true,
-        error: false,
-        result: await this.userRepository.save(userObj),
-      };
-    } catch (err) {
-      return {
-        success: false,
-        error: true,
-        message: err.detail,
-      };
+    const username: string = user.username;
+    const isUsernameExists: boolean =  await this.userRepository.exist({where:{username}})
+    if(isUsernameExists){
+      throw new HttpException(
+        { success: false, error: true, message: 'Username already exists' },
+        400,
+      );
     }
+    const userObj: User = new User();
+    for (const key in user) {
+      if (user.hasOwnProperty(key)) {
+        userObj[key] = user[key];
+      }
+    }
+    const salt = await bcrypt.genSalt();
+    userObj.password = await bcrypt.hash(user.password, salt);
+
+    return {
+      success: true,
+      error: false,
+      result: await this.userRepository.save(userObj),
+    };
   }
 
   async getAllUsers(): Promise<any> {

@@ -1,15 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, NumericType } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Collection {
   @PrimaryGeneratedColumn()
   id: number;
+  
+  @Column()
+  userId: number;
 
-  @Column({ nullable: false })
-  user_id: number;
-
-  @Column({ nullable: false })
-  book_id: number;
+  @Column()
+  bookId: number;
 
   @Column({ default: false })
   is_in_wishlist: boolean;

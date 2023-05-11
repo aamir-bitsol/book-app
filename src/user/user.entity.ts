@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Collection } from 'src/collection/collection.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class User {
@@ -22,4 +23,7 @@ export class User {
 
   @Column({ default: '', nullable: true })
   image: string;
+
+  // @OneToOne(()=> Collection, collection => collection.user)
+  // collection: Collection;
 }

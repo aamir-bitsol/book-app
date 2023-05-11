@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
   Body,
-  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -17,7 +16,6 @@ import {
   ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { query } from 'express';
 
 @ApiTags('User')
 @Controller('user')

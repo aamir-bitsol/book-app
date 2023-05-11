@@ -11,11 +11,11 @@ import { User } from 'src/user/user.entity';
     TypeOrmModule.forFeature([User]),
     ConfigModule.forRoot(),
     JwtModule.register({
+      global: true,
       secret: process.env.MY_SECRET_KEY,
     }),
   ],
   providers: [AuthService],
   controllers: [AuthController],
-  exports: [JwtModule],
 })
 export class AuthModule {}
