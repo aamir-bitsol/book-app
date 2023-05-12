@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Request,
   UseGuards
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
@@ -17,11 +18,14 @@ import {
   ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentService: CommentsService) {}
+  constructor(
+    private readonly commentService: CommentsService,
+    ) {}
 
   @ApiOperation({ summary: 'Get all comments' })
   @ApiResponse({ status: 200, description: 'Returns an array of comments' })
@@ -36,8 +40,9 @@ export class CommentsController {
     description: 'Invalid User or Book ID or incomplete data',
     status: 400,
   })
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  async createComment(@Body() commentData: CreateCommentDTO) {
+  async createComment(@Body() commentData: CreateCommentDTO, @Request() req ) {
     return this.commentService.createComment(commentData);
   }
 
@@ -52,6 +57,7 @@ export class CommentsController {
     required: true,
     description: 'Id to point the comment which needs to be updated',
   })
+  @UseGuards(AuthGuard('jwt'))
   @Put(':id')
   async updateComment(@Param('id') id: number, @Body() data: UpdateCommentDTO) {
     return this.commentService.updateComment(id, data);
@@ -65,6 +71,7 @@ export class CommentsController {
     required: true,
     description: 'Id to point the comment which needs to be removed',
   })
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   async deleteComment(@Param('id') id: number) {
     return this.commentService.deleteComment(id);

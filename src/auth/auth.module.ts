@@ -5,17 +5,21 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
+import { PassportModule } from "@nestjs/passport"
+import { JwtStrategy } from './strategies/jwt.strategies';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     ConfigModule.forRoot(),
+    PassportModule,
     JwtModule.register({
       global: true,
       secret: process.env.MY_SECRET_KEY,
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
+  exports: [AuthService]
 })
 export class AuthModule {}

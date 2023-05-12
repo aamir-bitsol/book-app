@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -16,6 +17,7 @@ import {
   ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('User')
 @Controller('user')
@@ -59,7 +61,8 @@ export class UserController {
   })
   @Post()
   async createUser(@Body() user: CreateUserDto): Promise<any> {
-    return await this.userService.createUser(user);
+    const response = await this.userService.createUser(user);
+    return response;
   }
 
   @ApiOperation({ summary: 'Deletes a user' })
@@ -76,6 +79,7 @@ export class UserController {
     description: 'Given ID is invalid.',
     status: 400,
   })
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   async deleteUser(@Param('id') id: number): Promise<any> {
     return await this.userService.deleteUser(id);
@@ -97,6 +101,7 @@ export class UserController {
       'Request Data is incomplete. Please double check the data for user.',
     status: 400,
   })
+  @UseGuards(AuthGuard('jwt'))
   @Put(':id')
   updateUser(
     @Param('id') id: number,

@@ -1,6 +1,5 @@
-import { Collection } from 'src/collection/collection.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
-
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { IsEmail } from 'class-validator';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -20,6 +19,10 @@ export class User {
 
   @Column({ nullable: false })
   password: string;
+
+  @Column({ nullable: false , unique: true})
+  @IsEmail()
+  email: string;
 
   @Column({ default: '', nullable: true })
   image: string;
