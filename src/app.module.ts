@@ -13,6 +13,8 @@ import { CollectionModule } from './collection/collection.module';
 import { Collection } from './collection/collection.entity';
 import { CommentsModule } from './comments/comments.module';
 import { Comment } from './comments/comments.entity';
+import { LikesModule } from './likes/likes.module';
+import { Like } from './likes/likes.entity';
 
 
 @Module({
@@ -25,7 +27,7 @@ import { Comment } from './comments/comments.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Book, User, Collection, Comment],
+      entities: [Book, User, Collection, Comment, Like],
       synchronize: true,
       dropSchema: true,
     }),
@@ -35,6 +37,7 @@ import { Comment } from './comments/comments.entity';
     AuthModule,
     CollectionModule,
     CommentsModule,
+    LikesModule,
     ],
   controllers: [AppController],
   providers: [AppService],
