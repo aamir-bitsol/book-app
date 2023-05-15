@@ -5,10 +5,11 @@ import { User } from 'src/user/user.entity';
 import { Book } from 'src/book/book.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Like } from './likes.entity';
+import { EventsService } from 'src/event_service/event_service.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Like, Book, User]),],
   controllers: [LikesController],
-  providers: [LikesService]
+  providers: [LikesService, EventsService]
 })
 export class LikesModule {}

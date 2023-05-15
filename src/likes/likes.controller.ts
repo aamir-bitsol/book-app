@@ -2,37 +2,82 @@ import {
   Controller,
   Post,
   Get,
-  Put,
   Delete,
   Body,
   Param,
   Request,
   UseGuards,
+  Sse,
 } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import { LikesService } from './likes.service';
 import { IncreaseLikeDTO, RemoveLikeDTO } from './likes.dto';
+import {
+  ApiTags,
+  ApiResponse,
+  ApiOperation,
+  ApiParam,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
+import { EventsService } from 'src/event_service/event_service.service';
 
+@ApiTags('Likes')
 @Controller('likes')
 export class LikesController {
-  constructor(private readonly likesService: LikesService) {}
+  constructor(
+    private readonly likesService: LikesService,
+    private readonly eventsService: EventsService,
+  ) {}
 
-  @Get()
+  @Sse('events')
+  events(@Request() req): Observable<any> {
+    return this.eventsService.subscribe();
+  }
+  
+  @ApiOperation({ summary: 'Get all the likes on every book' })
+  @ApiResponse({ status: 200, description: 'Returns the created comment' })
+  @ApiBadRequestResponse({
+    description: 'Invalid User or Book ID or incomplete data',
+    status: 400,
+  })
+  @Get('')
   async getAllLikes() {
     return this.likesService.getAllLikes();
   }
+ 
 
+  @ApiOperation({ summary: 'Get likes of a specific book' })
+  @ApiResponse({ status: 200, description: 'Returns the likes of given book' })
+  @ApiBadRequestResponse({
+    description: 'Invalid User or Book ID or incomplete data',
+    status: 400,
+  })
   @Get(':id')
   async getLikesOfABook(@Param('id') id: number) {
     return this.likesService.getLikesOfABook(id);
   }
 
-  @Post()
+  @ApiOperation({ summary: 'Like a book for given user' })
+  @ApiResponse({ status: 200, description: 'Returns the liked book' })
+  @ApiBadRequestResponse({
+    description: 'Invalid User ID or Book ID or incomplete data',
+    status: 400,
+  })
+  @Post('')
   async increaseLike(@Body() data: IncreaseLikeDTO) {
     return this.likesService.increaseLike(data);
   }
 
-  @Post(':id')
-  async removeLike(@Param('id') id: number, @Body() data: RemoveLikeDTO){
-    return this.likesService.removeLike(id, data);
+  @ApiOperation({ summary: 'Removes like of a specific book' })
+  @ApiResponse({ status: 200, description: 'Remove the like' })
+  @ApiBadRequestResponse({
+    description: 'Invalid User ID or Book ID or incomplete data',
+    status: 400,
+  })
+  @Delete('')
+  async removeLike(
+    @Body() data: RemoveLikeDTO,
+  ) {
+    return this.likesService.removeLike(data);
   }
 }

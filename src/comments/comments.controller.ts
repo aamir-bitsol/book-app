@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDTO, UpdateCommentDTO } from './comments.dto';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiResponse,
@@ -18,7 +19,6 @@ import {
   ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Comments')
 @Controller('comments')

@@ -18,13 +18,11 @@ import {
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { NotificationService } from 'src/notification/notification.service';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(
-    private readonly userService: UserService,
-    private readonly notificationService: NotificationService,) {}
+    private readonly userService: UserService,){}
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
@@ -65,7 +63,6 @@ export class UserController {
   @Post()
   async createUser(@Body() user: CreateUserDto): Promise<any> {
     const response = await this.userService.createUser(user);
-    await this.notificationService.sendPushNotification("User-Created", "welcome", 'Welcome to our app')
     return response;
   }
 

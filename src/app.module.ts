@@ -15,10 +15,14 @@ import { CommentsModule } from './comments/comments.module';
 import { Comment } from './comments/comments.entity';
 import { LikesModule } from './likes/likes.module';
 import { Like } from './likes/likes.entity';
-
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname,'..', 'client'),
+    }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "postgres",
