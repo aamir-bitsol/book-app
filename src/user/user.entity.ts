@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { IsEmail } from 'class-validator';
+import { Book } from 'src/book/book.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -26,6 +27,9 @@ export class User {
 
   @Column({ default: '', nullable: true })
   image: string;
+
+  @OneToMany(()=> Book, (book)=> book.author)
+  books: Book[]
 
   // @OneToOne(()=> Collection, collection => collection.user)
   // collection: Collection;

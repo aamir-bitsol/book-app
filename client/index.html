@@ -25,26 +25,39 @@ Errors:<br/>
 <hr/>
 Create parallel event:<br/>
 
-<form id="form1">
+<form id="formLikes1">
     <input type="submit" value="Get">
 </form>
 
-<form id="form2">
+<form id="formLikes2">
     <input type="submit" value="Post">
 </form>
 
-<form id="form3">
+<form id="formLikes3">
     <input type="submit" value="Delete">
 </form>
 
+<form id="formCmnt1">
+    <input type="submit" value="Delete Comment">
+</form>
+
+<form id="formCmnt2">
+    <input type="submit" value="Post Comment">
+</form>
+
+<form id="formCmnt3">
+    <input type="submit" value="Update Comment">
+</form>
+
 <script type="text/javascript">
-  const subscription = new EventSource(`/likes/events`);
-  subscription.onmessage = (message) => {
+  const Subscription = new EventSource(`/event-service/events`);
+  // const likesSubscription = new EventSource(`/likes/events`);
+  Subscription.onmessage = (message) => {
     document.getElementById("result").innerHTML += message.data + "<br/>";
   };
-  subscription.onerror = (message) => {
-    document.getElementById("errors").innerHTML += JSON.stringify(message) + "<br/>";
-  };
+  // likesSubscription.onmessage = (message) => {
+    // document.getElementById("result").innerHTML += message.data + "<br/>";
+  // };
 
   function formSubmitLikesGet(event) {
     const url = "/likes";
@@ -57,17 +70,31 @@ Create parallel event:<br/>
     event.preventDefault();
   }
   function formSubmitLikesPost(event) {
-    const url = "/likes";
-    const request = new XMLHttpRequest();
-    request.open('POST', url, true);
-    request.onload = function () {
-      console.log(request.responseText);
-    };
-    request.send(new FormData(event.target));
     event.preventDefault();
+    const url = "/likes";
+    const request = fetch(url, {
+      method: "POST",
+      headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({userId: 1, bookId:1}),
+    });
   }
   function formSubmitDelete(event) {
+    event.preventDefault();
     const url = "/likes";
+    const request = fetch(url, {
+      method: "DELETE",
+      headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({userId: 1, bookId:1}),
+    });
+  }
+
+
+  function formSubmitDeleteCmnt(event) {
+    const url = "/comments/1";
     const request = new XMLHttpRequest();
     request.open('DELETE', url, true);
     request.onload = function () {
@@ -76,10 +103,34 @@ Create parallel event:<br/>
     request.send(new FormData(event.target));
     event.preventDefault();
   }
+  function formSubmitPostCmnt(event) {
+    const url = "/comments";
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.onload = function () {
+      console.log(request.responseText);
+    };
+    request.send(new FormData(event.target));
+    event.preventDefault();
+  }
+  function formSubmitUpdateCmnt(event) {
+    const url = "/comments/1";
+    const request = new XMLHttpRequest();
+    request.open('PUT', url, true);
+    request.onload = function () {
+      console.log(request.responseText);
+    };
+    request.send(new FormData(event.target));
+    event.preventDefault();
+  }
 
-  document.getElementById("form1").addEventListener("submit", formSubmitLikesGet);
-  document.getElementById("form2").addEventListener("submit", formSubmitLikesPost);
-  document.getElementById("form3").addEventListener("submit", formSubmitDelete);
+  document.getElementById("formLikes1").addEventListener("submit", formSubmitLikesGet);
+  document.getElementById("formLikes2").addEventListener("submit", formSubmitLikesPost);
+  document.getElementById("formLikes3").addEventListener("submit", formSubmitDelete);
+
+  document.getElementById("formCmnt1").addEventListener("submit", formSubmitDeleteCmnt);
+  document.getElementById("formCmnt2").addEventListener("submit", formSubmitPostCmnt);
+  document.getElementById("formCmnt3").addEventListener("submit", formSubmitUpdateCmnt);
 </script>
 
 </body>

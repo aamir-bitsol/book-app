@@ -1,5 +1,7 @@
 import { Collection } from 'src/collection/collection.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Comment } from 'src/comments/comments.entity';
+import { User } from 'src/user/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Book {
@@ -9,9 +11,13 @@ export class Book {
   @Column({ default: '', nullable: false })
   title: string;
 
-  @Column({ default: '', nullable: false })
-  author: string;
+  @OneToOne(()=> User, {nullable: false})
+  @JoinColumn()
+  author: User;
 
+  @OneToMany(()=> Comment, (comment) => comment.book)
+  reviews: Comment[];
+  
   // @OneToOne(() => Collection, (collection) => collection.book)
   // collection: Collection;
 }

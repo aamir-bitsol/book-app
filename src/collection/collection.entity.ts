@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Collection {
@@ -12,5 +12,5 @@ export class Collection {
   bookId: number;
 
   @Column({ default: false })
-  is_in_wishlist: boolean;
+  isFavorite: boolean;
 }

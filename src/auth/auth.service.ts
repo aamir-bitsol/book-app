@@ -1,10 +1,10 @@
 import { AuthDTO, IPayload } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
-import { compare } from "bcrypt"
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -22,11 +22,17 @@ export class AuthService {
     });
 
     if (!user) {
-      return { message: 'Incorrect username!' };
+      throw new HttpException(
+        { success: false, error: true, message: 'Incorrect username!' },
+        400,
+      );
     }
     const isValidPassword = await compare(password, user.password);
     if (!isValidPassword) {
-      return { message: 'Incorrect password!' };
+      throw new HttpException(
+        { success: false, error: true, message: 'Incorrect Password!' },
+        400,
+      );
     }
 
     const payload: IPayload = { username, userId: user.id };

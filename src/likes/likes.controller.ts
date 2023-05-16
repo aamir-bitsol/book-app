@@ -9,7 +9,6 @@ import {
   UseGuards,
   Sse,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { LikesService } from './likes.service';
 import { IncreaseLikeDTO, RemoveLikeDTO } from './likes.dto';
 import {
@@ -19,21 +18,14 @@ import {
   ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { EventsService } from 'src/event_service/event_service.service';
 
 @ApiTags('Likes')
 @Controller('likes')
 export class LikesController {
   constructor(
     private readonly likesService: LikesService,
-    private readonly eventsService: EventsService,
   ) {}
 
-  @Sse('events')
-  events(@Request() req): Observable<any> {
-    return this.eventsService.subscribe();
-  }
-  
   @ApiOperation({ summary: 'Get all the likes on every book' })
   @ApiResponse({ status: 200, description: 'Returns the created comment' })
   @ApiBadRequestResponse({

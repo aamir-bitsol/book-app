@@ -7,7 +7,7 @@ import {
   Body,
   Param,
   Request,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDTO, UpdateCommentDTO } from './comments.dto';
@@ -25,7 +25,7 @@ import {
 export class CommentsController {
   constructor(
     private readonly commentService: CommentsService,
-    ) {}
+  ) {}
 
   @ApiOperation({ summary: 'Get all comments' })
   @ApiResponse({ status: 200, description: 'Returns an array of comments' })
@@ -42,7 +42,7 @@ export class CommentsController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async createComment(@Body() commentData: CreateCommentDTO, @Request() req ) {
+  async createComment(@Body() commentData: CreateCommentDTO, @Request() req) {
     return this.commentService.createComment(commentData);
   }
 
@@ -73,6 +73,7 @@ export class CommentsController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
+  
   async deleteComment(@Param('id') id: number) {
     return this.commentService.deleteComment(id);
   }

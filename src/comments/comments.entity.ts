@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Book } from 'src/book/book.entity';
+import { User } from 'src/user/user.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity()
 export class Comment {
@@ -8,9 +17,11 @@ export class Comment {
   @Column({ nullable: false })
   comment: string;
 
-  @Column({ nullable: false })
-  userId: number;
+  @OneToOne(() => User)
+  @JoinColumn()
+  user: User;
 
-  @Column({ nullable: false })
-  bookId: number;
+  @OneToOne(() => Book)
+  @JoinColumn()
+  book: Book;
 }

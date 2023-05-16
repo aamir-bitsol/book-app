@@ -17,11 +17,9 @@ export class LikesService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly eventsService: EventsService,
-
   ) {}
-  
+
   async getAllLikes() {
-    this.eventsService.emit({message: 'you liked a book'})
     return { success: true, error: false, message: await this.likeRepo.find() };
   }
 
@@ -34,14 +32,13 @@ export class LikesService {
   }
 
   async increaseLike(data: IncreaseLikeDTO) {
-    console.log(data);
     const bookId: number = data.bookId;
     const user_id: number = data.userId;
     const user: User = await this.userRepo.findOne({ where: { id: user_id } });
     const book: Book = await this.bookRepo.findOne({ where: { id: bookId } });
 
     if (!user || !book) {
-      this.eventsService.emit({message: 'Unable to like this book!'})
+      this.eventsService.emit({ message: 'Unable to like this book!' });
       throw new HttpException(
         { success: false, error: true, message: 'Invalid User Id or Book Id' },
         400,
@@ -53,6 +50,7 @@ export class LikesService {
     });
 
     if (!likes) {
+      this.eventsService.emit({ message: 'You liked a book' });
       const newLike: Like = new Like();
       newLike.bookId = bookId;
       newLike.userId = [user_id];
@@ -60,10 +58,9 @@ export class LikesService {
       return await this.likeRepo.save(newLike);
     }
 
-    
     const userExistsInArray: boolean = likes.userId.includes(user_id);
     if (userExistsInArray) {
-      this.eventsService.emit({message: 'You have already liked this book'})
+      this.eventsService.emit({ message: 'You have already liked this book' });
       throw new HttpException(
         {
           success: true,
@@ -78,7 +75,7 @@ export class LikesService {
     likes.likes_count = likes.userId.length;
     likes.userId = likes.userId.map(Number);
 
-    this.eventsService.emit({message: 'you liked a book'})
+    this.eventsService.emit({ message: 'You liked a book' });
     return {
       success: true,
       error: false,
@@ -93,7 +90,7 @@ export class LikesService {
     const book: Book = await this.bookRepo.findOne({ where: { id: bookId } });
 
     if (!user || !book) {
-      this.eventsService.emit({message: 'Unable to unlike this book'})
+      this.eventsService.emit({ message: 'Unable to unlike this book' });
       throw new HttpException(
         { success: false, error: true, message: 'Invalid User Id or Book Id' },
         400,
@@ -106,10 +103,9 @@ export class LikesService {
 
     const userInLiked: boolean = likes.userId.includes(userId);
     if (!userInLiked) {
-      this.eventsService.emit({message: 'Unable to unlike this book'})
+      this.eventsService.emit({ message: 'Unable to unlike this book' });
 
       throw new HttpException(
-        
         {
           success: false,
           error: true,
@@ -118,8 +114,8 @@ export class LikesService {
         400,
       );
     }
-    
-    this.eventsService.emit({message: 'you unlike a book'})
+
+    this.eventsService.emit({ message: 'You unlike a book' });
 
     const index = likes.userId.indexOf(userId);
     likes.userId.splice(index, 1);

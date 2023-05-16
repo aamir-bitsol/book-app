@@ -5,6 +5,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { Book } from 'src/book/book.entity';
 import { Comment } from './comments.entity';
+import { EventsService } from 'src/event_service/event_service.service';
 
 @Injectable()
 export class CommentsService {
@@ -15,9 +16,12 @@ export class CommentsService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Comment)
     private readonly commentsRepo: Repository<Comment>,
+    private readonly eventsService: EventsService,
   ) {}
   async getAllComments() {
-    const allComments: Comment[] = await this.commentsRepo.find();
+    const allComments: Comment[] = await this.commentsRepo.find({
+      relations: ['book', 'user'],
+    });
     if (allComments.length == 0) {
       throw new HttpException(
         { success: false, error: true, message: 'No Data Available' },
@@ -28,33 +32,45 @@ export class CommentsService {
   }
 
   async createComment(data: CreateCommentDTO) {
-    const book_id: number = data.bookId;
-    const user_id: number = data.userId;
+    const book_id: Book = data.book;
+    const user_id: User = data.user;
 
     const is_user: boolean = await this.userRepo.exist({
-      where: { id: user_id },
+      where: { id: user_id.id },
     });
     const is_book: boolean = await this.bookRepo.exist({
-      where: { id: book_id },
+      where: { id: book_id.id },
     });
 
     if (!is_book || !is_user) {
+      this.eventsService.emit({ message: `You added a comment on Book` });
+
       throw new HttpException(
         { success: false, error: true, message: 'Invalid User Id or Book Id' },
         400,
       );
     }
     const comment: Comment = await this.commentsRepo.save(data);
+
+    const output =  await this.commentsRepo.findOne({
+      where: { id: comment.id },
+      relations: ['book', 'user'],
+    })
+
     return {
       success: true,
       error: false,
-      message: comment,
+      message: await this.commentsRepo.find({
+        where: { id: comment.id },
+        relations: ['book', 'user'],
+      }),
     };
   }
 
   async deleteComment(id: number) {
     const findComment = await this.commentsRepo.findOne({ where: { id } });
     if (!findComment) {
+      this.eventsService.emit({ message: 'Unable to delete your comment' });
       throw new HttpException(
         {
           success: false,
@@ -65,6 +81,7 @@ export class CommentsService {
       );
     }
     const deleteComment: DeleteResult = await this.commentsRepo.delete(id);
+    this.eventsService.emit({ message: 'You deleted your comment' });
     return {
       success: true,
       error: false,
@@ -73,13 +90,20 @@ export class CommentsService {
   }
 
   async updateComment(id: number, data: UpdateCommentDTO) {
-    const commentObj: Comment = await this.commentsRepo.findOne({where:{id}})
-    if(!commentObj){
-      throw new HttpException({
-        success: false,
-        error: true,
-        message: "Invalid comment Id"
-      }, 400);
+    const commentObj: Comment = await this.commentsRepo.findOne({
+      where: { id },
+    });
+    if (!commentObj) {
+      this.eventsService.emit({ message: 'Unable to update your comment' });
+
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Invalid comment Id',
+        },
+        400,
+      );
     }
     console.log(data);
     for (const key in commentObj) {
@@ -87,10 +111,13 @@ export class CommentsService {
         commentObj[key] = data[key];
       }
     }
+
+    this.eventsService.emit({ message: 'You updated your comment' });
+
     return {
       success: true,
       error: false,
       message: await this.commentsRepo.save(commentObj),
-    }; 
+    };
   }
 }
