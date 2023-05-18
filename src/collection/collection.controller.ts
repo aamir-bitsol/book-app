@@ -30,14 +30,20 @@ export class CollectionController {
   }
 
   @ApiOperation({ summary: 'Create a new collection' })
-  @ApiResponse({ status: 201, description: 'Returns the newly created collection' })
+  @ApiResponse({
+    status: 201,
+    description: 'Returns the newly created collection',
+  })
   @Post()
   async createCollection(@Body() createCollectionDto: CreateCollectionDTO) {
     return await this.collectionService.createCollection(createCollectionDto);
   }
 
   @ApiOperation({ summary: 'Get specific collection' })
-  @ApiResponse({ status: 200, description: 'Returns a single collection record' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns a single collection record',
+  })
   @ApiBadRequestResponse({
     status: 400,
     description: 'Unable to get the record against given ID',
@@ -47,7 +53,6 @@ export class CollectionController {
     return this.collectionService.getSpecificCollection(id);
   }
 
-  
   @ApiOperation({ summary: 'Update user details' })
   @ApiParam({
     name: 'id',
@@ -73,7 +78,10 @@ export class CollectionController {
   }
 
   @ApiOperation({ summary: 'Delete a collection' })
-  @ApiResponse({ status: 200, description: 'Delete the record against given ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Delete the record against given ID',
+  })
   @ApiBadRequestResponse({
     status: 400,
     description: 'Unable to delete the record against given ID',

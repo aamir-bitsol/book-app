@@ -43,15 +43,17 @@ export class CollectionService {
     const data_exists: boolean = await this.collectionRepo.exist({
       where: { userId: user_id, bookId: book_id },
     });
-    
+
     if (data_exists) {
       throw new HttpException(
         { success: false, error: true, message: 'Data already exists' },
         400,
-        );
-      }
+      );
+    }
 
-    const collection: Collection = await this.collectionRepo.save(collectionData);
+    const collection: Collection = await this.collectionRepo.save(
+      collectionData,
+    );
     return {
       success: true,
       error: false,

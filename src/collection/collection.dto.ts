@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Book } from 'src/book/book.entity';
-import { User } from 'src/user/user.entity';
 
 export class CreateCollectionDTO {
   @ApiProperty({ description: 'User ID', type: 'number', required: true })

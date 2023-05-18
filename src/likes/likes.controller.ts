@@ -1,30 +1,17 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Delete,
-  Body,
-  Param,
-  Request,
-  UseGuards,
-  Sse,
-} from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { IncreaseLikeDTO, RemoveLikeDTO } from './likes.dto';
 import {
   ApiTags,
   ApiResponse,
   ApiOperation,
-  ApiParam,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('Likes')
 @Controller('likes')
 export class LikesController {
-  constructor(
-    private readonly likesService: LikesService,
-  ) {}
+  constructor(private readonly likesService: LikesService) {}
 
   @ApiOperation({ summary: 'Get all the likes on every book' })
   @ApiResponse({ status: 200, description: 'Returns the created comment' })
@@ -36,7 +23,6 @@ export class LikesController {
   async getAllLikes() {
     return this.likesService.getAllLikes();
   }
- 
 
   @ApiOperation({ summary: 'Get likes of a specific book' })
   @ApiResponse({ status: 200, description: 'Returns the likes of given book' })
@@ -67,9 +53,7 @@ export class LikesController {
     status: 400,
   })
   @Delete('')
-  async removeLike(
-    @Body() data: RemoveLikeDTO,
-  ) {
+  async removeLike(@Body() data: RemoveLikeDTO) {
     return this.likesService.removeLike(data);
   }
 }

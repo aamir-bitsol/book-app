@@ -21,8 +21,7 @@ import { AuthGuard } from '@nestjs/passport';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,){}
+  constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
@@ -109,5 +108,10 @@ export class UserController {
     @Body() user: UpdateUserDto,
   ): Promise<any> {
     return this.userService.updateUser(id, user);
+  }
+
+  @Get('reviews/:id')
+  getUserReviews(@Param('id') id: number) {
+    return this.userService.getAllUserReviews(id);
   }
 }

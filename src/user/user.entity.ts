@@ -1,6 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  AfterLoad,
+  AfterInsert,
+  AfterUpdate,
+} from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Book } from 'src/book/book.entity';
+import { Comment } from 'src/comments/comments.entity';
+import { Review } from 'src/reviews/reviews.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -21,16 +31,28 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: false , unique: true})
+  @Column({ nullable: false, unique: true })
   @IsEmail()
   email: string;
 
   @Column({ default: '', nullable: true })
   image: string;
 
-  @OneToMany(()=> Book, (book)=> book.author)
-  books: Book[]
+  @OneToMany(() => Book, (book) => book.author)
+  books: Book[];
 
-  // @OneToOne(()=> Collection, collection => collection.user)
-  // collection: Collection;
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  async nullChecks() {
+    if (!this.reviews) {
+      this.reviews = [];
+    }
+  }
 }

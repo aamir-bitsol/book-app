@@ -13,6 +13,7 @@ import { LikesModule } from './likes/likes.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { EventServiceModule } from './event_service/event_service.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EventServiceModule } from './event_service/event_service.module';
     CommentsModule,
     LikesModule,
     EventServiceModule,
+    ReviewsModule,
     ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,8 +9,8 @@ import { EventsService } from 'src/event_service/event_service.service';
 import { EventServiceController } from 'src/event_service/event_service.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Like, Book, User]),],
+  imports: [TypeOrmModule.forFeature([Like, Book, User])],
   controllers: [LikesController, EventServiceController],
-  providers: [LikesService, EventsService]
+  providers: [LikesService, EventsService],
 })
 export class LikesModule {}

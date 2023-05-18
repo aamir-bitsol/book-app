@@ -1,7 +1,16 @@
-import { Collection } from 'src/collection/collection.entity';
 import { Comment } from 'src/comments/comments.entity';
+import { Review } from 'src/reviews/reviews.entity';
 import { User } from 'src/user/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  AfterInsert,
+  AfterLoad,
+  AfterUpdate,
+} from 'typeorm';
 
 @Entity()
 export class Book {
@@ -11,13 +20,21 @@ export class Book {
   @Column({ default: '', nullable: false })
   title: string;
 
-  @OneToOne(()=> User, {nullable: false})
-  @JoinColumn()
+  @ManyToOne(() => User, { nullable: false })
   author: User;
 
-  @OneToMany(()=> Comment, (comment) => comment.book)
-  reviews: Comment[];
-  
-  // @OneToOne(() => Collection, (collection) => collection.book)
-  // collection: Collection;
+  @OneToMany(() => Comment, (comment) => comment.book)
+  comments: Comment[];
+
+  @OneToMany(() => Review, (review) => review.book)
+  reviews: Review[];
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  async nullChecks() {
+    if (!this.reviews) {
+      this.reviews = [];
+    }
+  }
 }

@@ -8,9 +8,8 @@ export class Like {
   @Column({ nullable: true, default: 0 })
   likes_count: number;
 
-  @Column('integer',{ nullable: true, array: true })
+  @Column('integer', { nullable: true, array: true })
   userId: number[];
-
 
   @Column({ nullable: false })
   bookId: number;

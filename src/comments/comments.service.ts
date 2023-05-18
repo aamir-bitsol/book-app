@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { Book } from 'src/book/book.entity';
-import { Comment } from './comments.entity';
+import { Comment as Comment } from './comments.entity';
 import { EventsService } from 'src/event_service/event_service.service';
 
 @Injectable()
@@ -18,9 +18,15 @@ export class CommentsService {
     private readonly commentsRepo: Repository<Comment>,
     private readonly eventsService: EventsService,
   ) {}
+
   async getAllComments() {
     const allComments: Comment[] = await this.commentsRepo.find({
       relations: ['book', 'user'],
+      select: {
+        id: true,
+        comment: true,
+        user: { username: true, email: true },
+      },
     });
     if (allComments.length == 0) {
       throw new HttpException(
@@ -51,19 +57,19 @@ export class CommentsService {
       );
     }
     const comment: Comment = await this.commentsRepo.save(data);
-
-    const output =  await this.commentsRepo.findOne({
+    const output = await this.commentsRepo.findOne({
       where: { id: comment.id },
       relations: ['book', 'user'],
-    })
+      select: {
+        user: { id: true, username: true, email: true },
+        book: { id: true, title: true },
+      },
+    });
 
     return {
       success: true,
       error: false,
-      message: await this.commentsRepo.find({
-        where: { id: comment.id },
-        relations: ['book', 'user'],
-      }),
+      message: output,
     };
   }
 

@@ -20,13 +20,13 @@ export class AuthService {
     const user: User = await this.userRepository.findOne({
       where: { username },
     });
-
+    
     if (!user) {
       throw new HttpException(
         { success: false, error: true, message: 'Incorrect username!' },
         400,
-      );
-    }
+        );
+      }
     const isValidPassword = await compare(password, user.password);
     if (!isValidPassword) {
       throw new HttpException(

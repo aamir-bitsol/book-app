@@ -6,20 +6,20 @@ import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { EventsService } from 'src/event_service/event_service.service';
 
-
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly eventsService: EventsService,
-
   ) {}
 
   async createUser(user: CreateUserDto): Promise<any> {
     const username: string = user.username;
-    const isUsernameExists: boolean =  await this.userRepository.exist({where:{username}})
-    if(isUsernameExists){
+    const isUsernameExists: boolean = await this.userRepository.exist({
+      where: { username },
+    });
+    if (isUsernameExists) {
       throw new HttpException(
         { success: false, error: true, message: 'Username already exists' },
         400,
@@ -42,14 +42,19 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<any> {
-    const allUsers: User[] = await this.userRepository.find({relations:['books']});
+    const allUsers: User[] = await this.userRepository.find({
+      relations: ['books', 'comments', 'reviews'],
+      select: {
+        comments: { id: true, comment: true, book: { id: true } },
+      },
+    });
     if (allUsers.length == 0) {
       throw new HttpException(
         { success: false, error: true, message: 'No Data Available' },
         400,
       );
     }
-    return {success: true, error: false, message: allUsers};
+    return { success: true, error: false, message: allUsers };
   }
 
   async getSpecificUser(id: number): Promise<any> {
@@ -72,7 +77,9 @@ export class UserService {
   }
 
   async getSpecificUserByUsername(username: string): Promise<any> {
-    const user: User = await this.userRepository.findOne({ where: { username } });
+    const user: User = await this.userRepository.findOne({
+      where: { username },
+    });
     if (!user) {
       throw new HttpException(
         {
@@ -107,7 +114,9 @@ export class UserService {
         userObj[key] = user[key];
       }
     }
-    this.eventsService.emit({ message: 'User information updated successfully' });
+    this.eventsService.emit({
+      message: 'User information updated successfully',
+    });
 
     return {
       success: true,
@@ -133,6 +142,28 @@ export class UserService {
       success: true,
       error: false,
       message: user,
+    };
+  }
+
+  async getAllUserReviews(id: number) {
+    const query: User = await this.userRepository.findOne({
+      where: { id },
+      relations: ['books', 'reviews'],
+    });
+    if (!query) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Invalid User Id',
+        },
+        400,
+      );
+    }
+    return {
+      success: true,
+      error: false,
+      message: query,
     };
   }
 }

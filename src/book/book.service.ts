@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateBookDto, UpdateBookDto } from './book.dto';
 import { EventsService } from 'src/event_service/event_service.service';
 import { User } from 'src/user/user.entity';
-import { Comment } from 'src/comments/comments.entity';
+import { Comment as Comment } from 'src/comments/comments.entity';
 
 @Injectable()
 export class BookService {
@@ -20,10 +20,11 @@ export class BookService {
   ) {}
 
   async createBook(book: CreateBookDto): Promise<any> {
-    const user: User = book.author;
+    const author: number = book.author;
     const userObj: User = await this.userRepository.findOne({
-      where: { id: user.id },
+      where: { id: author },
     });
+
     if (!userObj) {
       throw new HttpException(
         { success: false, error: true, message: 'Invalid Author Id' },
@@ -31,24 +32,33 @@ export class BookService {
       );
     }
 
-    const bookObj: Book = new Book();
-    bookObj.author = book.author;
-    bookObj.title = book.title;
+    const query: Book = await this.bookRepository.create({
+      title: book.title,
+      author: userObj,
+    });
+
     this.eventsService.emit({ message: 'Book created successfully' });
-    await this.bookRepository.save(bookObj);
-    return await this.bookRepository.findOne({where:{id: bookObj.id}, relations: ['author', 'reviews']}) 
+
+    await this.bookRepository.save(query);
+
+    return await this.bookRepository.findOne({
+      where: { id: query.id },
+      relations: ['author', 'comments'],
+    });
   }
 
   async getAllBooks(): Promise<any> {
     const allBooks: Book[] = await this.bookRepository.find({
-      relations: ['author', 'reviews'],
+      relations: ['author', 'comments', 'reviews'],
     });
+
     if (allBooks.length == 0) {
       throw new HttpException(
         { success: false, error: true, message: 'No Data Available' },
         400,
       );
     }
+
     return { success: true, error: false, message: allBooks };
   }
 
@@ -56,6 +66,7 @@ export class BookService {
     const collection: Book = await this.bookRepository.findOne({
       where: { id },
     });
+
     if (!collection) {
       throw new HttpException(
         {
@@ -66,6 +77,7 @@ export class BookService {
         400,
       );
     }
+
     return {
       success: true,
       error: false,
@@ -85,6 +97,7 @@ export class BookService {
     const bookObj: Book = await this.bookRepository.findOne({
       where: { id },
     });
+
     if (!bookObj) {
       this.eventsService.emit({ message: 'Unable to Update Book' });
       throw new HttpException(
@@ -92,6 +105,7 @@ export class BookService {
         400,
       );
     }
+
     for (const key in bookObj) {
       if (book.hasOwnProperty(key)) {
         bookObj[key] = book[key];
@@ -110,6 +124,7 @@ export class BookService {
     const findBook: Book = await this.bookRepository.findOne({
       where: { id },
     });
+
     if (!findBook) {
       this.eventsService.emit({ message: 'Unable to Delete Book' });
 
@@ -125,6 +140,31 @@ export class BookService {
       success: true,
       error: false,
       message: book,
+    };
+  }
+
+  async getBooksReviews(id: number) {
+    const query: Book = await this.bookRepository.findOne({
+      where: { id },
+      relations: ['author', 'reviews'],
+      select:{
+        author: {id: true, username: true, name:true, email: true}
+      }
+    });
+    if (!query) {
+      throw new HttpException(
+        {
+          success: false,
+          error: true,
+          message: 'Invalid Book Id',
+        },
+        400,
+      );
+    }
+    return {
+      success: true,
+      error: false,
+      message: query,
     };
   }
 }

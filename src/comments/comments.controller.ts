@@ -23,9 +23,7 @@ import {
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(
-    private readonly commentService: CommentsService,
-  ) {}
+  constructor(private readonly commentService: CommentsService) {}
 
   @ApiOperation({ summary: 'Get all comments' })
   @ApiResponse({ status: 200, description: 'Returns an array of comments' })
@@ -73,7 +71,6 @@ export class CommentsController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  
   async deleteComment(@Param('id') id: number) {
     return this.commentService.deleteComment(id);
   }

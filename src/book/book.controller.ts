@@ -14,7 +14,6 @@ import {
   ApiTags,
   ApiResponse,
   ApiOperation,
-  ApiProperty,
   ApiParam,
   ApiQuery,
   ApiBadRequestResponse,
@@ -95,5 +94,10 @@ export class BookController {
   })
   deleteBook(@Param('id') id: number): Promise<any> {
     return this.bookService.deleteBook(id);
+  }
+
+  @Get('reviews/:id')
+  async getReviews(@Param('id') id: number) {
+    return this.bookService.getBooksReviews(id);
   }
 }
