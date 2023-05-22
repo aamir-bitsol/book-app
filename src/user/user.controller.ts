@@ -7,6 +7,9 @@ import {
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Inject,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -18,10 +21,22 @@ import {
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileUploadValidator } from './file.validator';
+import { diskStorage } from 'multer';
+import path from 'path';
+import { CustomInterceptors } from './custom.interceptor';
+
+
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    @Inject(FileUploadValidator)
+    private readonly fileValidator: FileUploadValidator,
+  ) {}
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
@@ -60,8 +75,32 @@ export class UserController {
     status: 400,
   })
   @Post()
-  async createUser(@Body() user: CreateUserDto): Promise<any> {
-    const response = await this.userService.createUser(user);
+  @UseInterceptors(CustomInterceptors)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './files',
+        filename: (req, file, callBack) => {
+          callBack(
+            null,
+            file.fieldname + '_' + Date.now() + path.extname(file.originalname),
+          );
+        },
+      }),
+      fileFilter: (req, file,callBack)=>{
+        console.log(file.originalname)
+        if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)){
+          return callBack(new Error('Only image files are allowed!'), false);
+        }
+        callBack(null, true);
+      }
+    }),
+  )
+  async createUser(
+    @Body() userData: CreateUserDto,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<any> {
+    const response = await this.userService.createUser(userData, image);
     return response;
   }
 

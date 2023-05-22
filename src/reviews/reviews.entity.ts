@@ -5,8 +5,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToOne,
-  JoinColumn,
   Unique,
 } from 'typeorm';
 
@@ -18,10 +16,10 @@ export class Review {
   @Column({ nullable: false })
   review: string;
 
-  @ManyToOne(() => User, (user) => user.reviews)
+  @ManyToOne(() => User, (user) => user.reviews, {onDelete: 'CASCADE'})
   user: User;
 
-  @ManyToOne(() => Book, (book) => book.reviews)
-  @Unique(['user', 'User']) // For every review, User must be unique against a book. If book changes all users can add review
+  @ManyToOne(() => Book, (book) => book.reviews, {onDelete:  'CASCADE'})
+  @Unique(['user', 'User']) // For every review, User must be unique against a book. For new book, all users can add review
   book: Book;
 }

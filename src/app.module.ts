@@ -14,6 +14,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { EventServiceModule } from './event_service/event_service.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -31,6 +32,9 @@ import { ReviewsModule } from './reviews/reviews.module';
       synchronize: true,
       autoLoadEntities: true,
       dropSchema: true,
+    }),
+    MulterModule.register({
+      dest: '/uploads'
     }),
     PassportModule.register({ defaultStrategy: 'jwt', session: false }),
     BookModule,

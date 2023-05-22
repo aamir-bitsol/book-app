@@ -1,11 +1,12 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { Book } from './book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { CreateBookDto, UpdateBookDto } from './book.dto';
 import { EventsService } from 'src/event_service/event_service.service';
 import { User } from 'src/user/user.entity';
 import { Comment as Comment } from 'src/comments/comments.entity';
+import { Review } from 'src/reviews/reviews.entity';
 
 @Injectable()
 export class BookService {
@@ -14,37 +15,33 @@ export class BookService {
     private readonly bookRepository: Repository<Book>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Comment)
-    private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(Review)
+    private readonly reviewRepository: Repository<Review>,
     private readonly eventsService: EventsService,
   ) {}
 
   async createBook(book: CreateBookDto): Promise<any> {
-    const author: number = book.author;
-    const userObj: User = await this.userRepository.findOne({
-      where: { id: author },
+    const authors: Array<number> = book.author;
+    const userObj: User[] = await this.userRepository.find({
+      where: { id: In(authors) },
     });
-
-    if (!userObj) {
+    if (userObj.length != book.author.length) {
       throw new HttpException(
-        { success: false, error: true, message: 'Invalid Author Id' },
+        { success: false, error: true, data: 'Invalid Author Id' },
         400,
       );
     }
-
-    const query: Book = await this.bookRepository.create({
+    const newBook: Book = await this.bookRepository.create({
       title: book.title,
       author: userObj,
     });
+    this.eventsService.emit({ data: 'Book created successfully' });
 
-    this.eventsService.emit({ message: 'Book created successfully' });
-
-    await this.bookRepository.save(query);
-
-    return await this.bookRepository.findOne({
-      where: { id: query.id },
-      relations: ['author', 'comments'],
-    });
+    return {
+      success: true,
+      error: false,
+      data: await this.bookRepository.save(newBook),
+    };
   }
 
   async getAllBooks(): Promise<any> {
@@ -54,17 +51,18 @@ export class BookService {
 
     if (allBooks.length == 0) {
       throw new HttpException(
-        { success: false, error: true, message: 'No Data Available' },
+        { success: false, error: true, data: 'No Data Available' },
         400,
       );
     }
 
-    return { success: true, error: false, message: allBooks };
+    return { success: true, error: false, data: allBooks };
   }
 
   async getBookById(id: number): Promise<any> {
     const collection: Book = await this.bookRepository.findOne({
       where: { id },
+      relations: ['author', 'comments', 'reviews'],
     });
 
     if (!collection) {
@@ -72,7 +70,7 @@ export class BookService {
         {
           success: false,
           error: true,
-          message: 'Unable to find the book',
+          data: 'Unable to find the book',
         },
         400,
       );
@@ -81,7 +79,7 @@ export class BookService {
     return {
       success: true,
       error: false,
-      message: collection,
+      data: collection,
     };
   }
 
@@ -89,19 +87,20 @@ export class BookService {
     try {
       return await this.bookRepository.find({ where: { title } });
     } catch (err) {
-      return { message: err.detail };
+      return { data: err.detail };
     }
   }
 
   async updateBook(id: number, book: UpdateBookDto): Promise<any> {
     const bookObj: Book = await this.bookRepository.findOne({
       where: { id },
+      relations: ['author', 'reviews', 'comments'],
     });
 
     if (!bookObj) {
-      this.eventsService.emit({ message: 'Unable to Update Book' });
+      this.eventsService.emit({ data: 'Unable to Update Book' });
       throw new HttpException(
-        { success: false, error: true, message: 'Invalid User ID' },
+        { success: false, error: true, data: 'Invalid User ID' },
         400,
       );
     }
@@ -111,12 +110,12 @@ export class BookService {
         bookObj[key] = book[key];
       }
     }
-    this.eventsService.emit({ message: 'Book updated successfully' });
+    this.eventsService.emit({ data: 'Book updated successfully' });
 
     return {
       success: true,
       error: false,
-      message: await this.bookRepository.save(bookObj),
+      data: await this.bookRepository.save(bookObj),
     };
   }
 
@@ -124,22 +123,22 @@ export class BookService {
     const findBook: Book = await this.bookRepository.findOne({
       where: { id },
     });
-
+    
     if (!findBook) {
-      this.eventsService.emit({ message: 'Unable to Delete Book' });
+      this.eventsService.emit({ data: 'Unable to Delete Book' });
 
       throw new HttpException(
-        { success: false, error: true, message: 'Unable to remove Book' },
+        { success: false, error: true, data: 'Unable to remove Book' },
         400,
       );
     }
-    this.eventsService.emit({ message: 'Book Deleted successfully' });
+    this.eventsService.emit({ data: 'Book Deleted successfully' });
 
-    const book: any = await this.bookRepository.delete(id);
+    const book: DeleteResult = await this.bookRepository.delete(id);
     return {
       success: true,
       error: false,
-      message: book,
+      data: book,
     };
   }
 
@@ -147,16 +146,16 @@ export class BookService {
     const query: Book = await this.bookRepository.findOne({
       where: { id },
       relations: ['author', 'reviews'],
-      select:{
-        author: {id: true, username: true, name:true, email: true}
-      }
+      select: {
+        author: { id: true, username: true, name: true, email: true },
+      },
     });
     if (!query) {
       throw new HttpException(
         {
           success: false,
           error: true,
-          message: 'Invalid Book Id',
+          data: 'Invalid Book Id',
         },
         400,
       );
@@ -164,7 +163,7 @@ export class BookService {
     return {
       success: true,
       error: false,
-      message: query,
+      data: query,
     };
   }
 }

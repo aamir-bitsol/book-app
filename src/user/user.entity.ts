@@ -3,9 +3,12 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToMany,
   AfterLoad,
   AfterInsert,
   AfterUpdate,
+  JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Book } from 'src/book/book.entity';
@@ -38,13 +41,13 @@ export class User {
   @Column({ default: '', nullable: true })
   image: string;
 
-  @OneToMany(() => Book, (book) => book.author)
+  @ManyToMany(() => Book, (book) => book.author)
   books: Book[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
 
-  @OneToMany(() => Review, (review) => review.user)
+  @OneToMany(() => Review, (review) => review.user, { cascade: true })
   reviews: Review[];
 
   @AfterLoad()

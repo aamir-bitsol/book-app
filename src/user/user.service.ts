@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
@@ -14,7 +14,7 @@ export class UserService {
     private readonly eventsService: EventsService,
   ) {}
 
-  async createUser(user: CreateUserDto): Promise<any> {
+  async createUser(user: CreateUserDto, image): Promise<any> {
     const username: string = user.username;
     const isUsernameExists: boolean = await this.userRepository.exist({
       where: { username },
@@ -25,12 +25,10 @@ export class UserService {
         400,
       );
     }
-    const userObj: User = new User();
-    for (const key in user) {
-      if (user.hasOwnProperty(key)) {
-        userObj[key] = user[key];
-      }
+    if(image){
+      user.image = `localhost:3000/files/${image.filename}`;
     }
+    const userObj: User = await this.userRepository.create(user)
     const salt = await bcrypt.genSalt();
     userObj.password = await bcrypt.hash(user.password, salt);
     this.eventsService.emit({ message: 'User created successfully' });
@@ -58,7 +56,10 @@ export class UserService {
   }
 
   async getSpecificUser(id: number): Promise<any> {
-    const user: User = await this.userRepository.findOne({ where: { id } });
+    const user: User = await this.userRepository.findOne({
+      where: { id },
+      relations: ['books', 'reviews', 'comments'],
+    });
     if (!user) {
       throw new HttpException(
         {
@@ -136,13 +137,21 @@ export class UserService {
         400,
       );
     }
-    this.eventsService.emit({ message: 'User deleted successfully' });
-    const user: any = await this.userRepository.delete(id);
-    return {
-      success: true,
-      error: false,
-      message: user,
-    };
+    try {
+      const user: DeleteResult = await this.userRepository.delete(id);
+      this.eventsService.emit({ message: 'User deleted successfully' });
+      return {
+        success: true,
+        error: false,
+        message: user,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: true,
+        message: 'This user has a book. Unable to remove this user',
+      };
+    }
   }
 
   async getAllUserReviews(id: number) {

@@ -6,10 +6,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
-  ManyToOne,
+  ManyToMany,
   AfterInsert,
   AfterLoad,
   AfterUpdate,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -20,8 +21,9 @@ export class Book {
   @Column({ default: '', nullable: false })
   title: string;
 
-  @ManyToOne(() => User, { nullable: false })
-  author: User;
+  @ManyToMany(() => User, user=> user.books,{ nullable: false })
+  @JoinTable()
+  author: User[];
 
   @OneToMany(() => Comment, (comment) => comment.book)
   comments: Comment[];
