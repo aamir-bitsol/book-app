@@ -25,10 +25,10 @@ export class UserService {
         400,
       );
     }
-    if(image){
+    if (image) {
       user.image = `localhost:3000/files/${image.filename}`;
     }
-    const userObj: User = await this.userRepository.create(user)
+    const userObj: User = await this.userRepository.create(user);
     const salt = await bcrypt.genSalt();
     userObj.password = await bcrypt.hash(user.password, salt);
     this.eventsService.emit({ message: 'User created successfully' });
@@ -39,12 +39,20 @@ export class UserService {
     };
   }
 
-  async getAllUsers(): Promise<any> {
+  async getAllUsers(page: number, pageSize: number): Promise<any> {
+    // const page: number = parseInt(req.query.page) || 1;
+    // const pageSize: number = parseInt(req.query.pageSize) || 10;
+    const offset: number = (page - 1) * pageSize;
+    const limit: number = pageSize;
+    const totalUsers: number = await this.userRepository.count();
+    const totalPages: number = Math.ceil(totalUsers / pageSize);
     const allUsers: User[] = await this.userRepository.find({
       relations: ['books', 'comments', 'reviews'],
       select: {
         comments: { id: true, comment: true, book: { id: true } },
       },
+      skip: offset,
+      take: limit,
     });
     if (allUsers.length == 0) {
       throw new HttpException(
@@ -52,7 +60,14 @@ export class UserService {
         400,
       );
     }
-    return { success: true, error: false, message: allUsers };
+    return { success: true, error: false, data:{
+      page,
+      pageSize,
+      totalUsers,
+      totalPages,
+      data: allUsers,
+
+    }  };
   }
 
   async getSpecificUser(id: number): Promise<any> {

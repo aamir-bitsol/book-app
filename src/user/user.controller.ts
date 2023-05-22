@@ -10,6 +10,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Inject,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -41,8 +43,8 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
   @Get()
-  async getAllUsers() {
-    return await this.userService.getAllUsers();
+  async getAllUsers(@Query('page', ParseIntPipe) page: number=1, @Query('pageSize', ParseIntPipe) pageSize: number=10) {
+    return await this.userService.getAllUsers(page, pageSize);
   }
 
   @ApiOperation({ summary: 'Get a specific users' })
@@ -54,7 +56,7 @@ export class UserController {
     description: 'Integer value to get the specific user.',
   })
   @Get(':id')
-  async getSpecificUser(@Param('id') id: number) {
+  async getSpecificUser(@Param('id', ParseIntPipe) id: number) {
     console.log('id');
     return await this.userService.getSpecificUser(id);
   }
