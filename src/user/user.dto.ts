@@ -33,6 +33,13 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
+    description: 'Email of user',
+    type: 'string',
+    required: true,
+  })
+  email: string;
+
+  @ApiProperty({
     description: 'Image of user',
     type: 'string',
     required: false,

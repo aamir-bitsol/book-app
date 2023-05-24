@@ -17,9 +17,13 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { UserMiddleware, UserMiddlewareFunction } from './middleware/user.middleware';
 import { UserController } from './user/user.controller';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './tasks/tasks.module';
+
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname,'..', 'client'),
     }),
@@ -47,6 +51,7 @@ import { UserController } from './user/user.controller';
     LikesModule,
     EventServiceModule,
     ReviewsModule,
+    TasksModule,
     ],
   controllers: [AppController],
   providers: [AppService],
