@@ -5,6 +5,7 @@ import { UpdateUserDto, CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { EventsService } from 'src/event_service/event_service.service';
+import { dUser } from './user.decorator';
 
 @Injectable()
 export class UserService {
@@ -39,9 +40,10 @@ export class UserService {
     };
   }
 
-  async getAllUsers(page: number, pageSize: number): Promise<any> {
+  async getAllUsers(page: number, pageSize: number, name: any): Promise<any> {
     // const page: number = parseInt(req.query.page) || 1;
     // const pageSize: number = parseInt(req.query.pageSize) || 10;
+    console.log(name);
     const offset: number = (page - 1) * pageSize;
     const limit: number = pageSize;
     const totalUsers: number = await this.userRepository.count();

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
@@ -15,6 +15,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { EventServiceModule } from './event_service/event_service.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { UserMiddleware, UserMiddlewareFunction } from './middleware/user.middleware';
+import { UserController } from './user/user.controller';
 
 @Module({
   imports: [
@@ -49,4 +51,14 @@ import { MulterModule } from '@nestjs/platform-express';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+      // consumer.apply(UserMiddleware).forRoutes({path: 'user', method: RequestMethod.GET})
+      consumer.apply(UserMiddleware).exclude(
+        // {path: 'book', method: RequestMethod.GET},
+        // 'book/(.*)'
+        )
+        .forRoutes(UserController);
+      consumer.apply(UserMiddlewareFunction).forRoutes({path:'book/', method: RequestMethod.GET})
+  }
+}

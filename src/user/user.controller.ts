@@ -12,6 +12,7 @@ import {
   Inject,
   ParseIntPipe,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -29,6 +30,7 @@ import { FileUploadValidator } from './file.validator';
 import { diskStorage } from 'multer';
 import path from 'path';
 import { CustomInterceptors } from './custom.interceptor';
+import { dUser } from './user.decorator';
 
 
 @ApiTags('User')
@@ -43,8 +45,8 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
   @Get()
-  async getAllUsers(@Query('page', ParseIntPipe) page: number=1, @Query('pageSize', ParseIntPipe) pageSize: number=10) {
-    return await this.userService.getAllUsers(page, pageSize);
+  async getAllUsers(@Query('page', ParseIntPipe) page: number=1,@dUser(new ValidationPipe({validateCustomDecorators:true}), ParseIntPipe) user, @Query('pageSize', ParseIntPipe) pageSize: number=10) {
+    return await this.userService.getAllUsers(page, pageSize, user);
   }
 
   @ApiOperation({ summary: 'Get a specific users' })
