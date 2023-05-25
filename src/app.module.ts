@@ -1,4 +1,9 @@
-import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  MiddlewareConsumer,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
@@ -15,17 +20,21 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { EventServiceModule } from './event_service/event_service.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { UserMiddleware, UserMiddlewareFunction } from './middleware/user.middleware';
+import {
+  UserMiddleware,
+  UserMiddlewareFunction,
+} from './middleware/user.middleware';
 import { UserController } from './user/user.controller';
+import { CookieMiddleware } from './middleware/cookie.middleware';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname,'..', 'client'),
+      rootPath: join(__dirname, '..', 'client'),
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: "postgres",
+      type: 'postgres',
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME,
@@ -36,7 +45,7 @@ import { UserController } from './user/user.controller';
       dropSchema: true,
     }),
     MulterModule.register({
-      dest: '/uploads'
+      dest: '/uploads',
     }),
     PassportModule.register({ defaultStrategy: 'jwt', session: false }),
     BookModule,
@@ -47,18 +56,23 @@ import { UserController } from './user/user.controller';
     LikesModule,
     EventServiceModule,
     ReviewsModule,
-    ],
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CookieMiddleware],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-      // consumer.apply(UserMiddleware).forRoutes({path: 'user', method: RequestMethod.GET})
-      consumer.apply(UserMiddleware).exclude(
-        // {path: 'book', method: RequestMethod.GET},
-        // 'book/(.*)'
-        )
-        .forRoutes(UserController);
-      consumer.apply(UserMiddlewareFunction).forRoutes({path:'book/', method: RequestMethod.GET})
+    // consumer.apply(UserMiddleware).forRoutes({path: 'user', method: RequestMethod.GET})
+    // consumer.apply(CookieMiddleware).forRoutes('*'); // Using cookies as a middleware for all the routes
+    consumer
+      .apply(UserMiddleware)
+      .exclude
+      // {path: 'book', method: RequestMethod.GET},
+      // 'book/(.*)'
+      ()
+      .forRoutes(UserController);
+    consumer
+      .apply(UserMiddlewareFunction)
+      .forRoutes({ path: 'book/', method: RequestMethod.GET });
   }
 }
