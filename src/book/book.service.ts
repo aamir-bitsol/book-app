@@ -22,6 +22,7 @@ export class BookService {
 
   async createBook(book: CreateBookDto): Promise<any> {
     const authors: Array<number> = book.author;
+
     const userObj: User[] = await this.userRepository.find({
       where: { id: In(authors) },
     });

@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   Query,
+  Req,
 } from '@nestjs/common';
 import { CreateBookDto, UpdateBookDto } from './book.dto';
 import { BookService } from './book.service';
@@ -27,7 +28,8 @@ export class BookController {
   @Get()
   @ApiOperation({ summary: 'Get all books' })
   @ApiResponse({ status: 200, description: 'Returns an array of books' })
-  getBooks(): Promise<any[]> {
+  getBooks(@Req() req): Promise<any[]> {
+    console.log(req.cookies)
     return this.bookService.getAllBooks();
   }
 
