@@ -18,16 +18,19 @@ import {
   ApiQuery,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { MyLoggerService } from 'src/mylogger/mylogger.service';
 
 @ApiTags('Book')
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
+  private logger = new MyLoggerService();
 
   @Get()
   @ApiOperation({ summary: 'Get all books' })
   @ApiResponse({ status: 200, description: 'Returns an array of books' })
   getBooks(): Promise<any[]> {
+    this.logger.log("controller")
     return this.bookService.getAllBooks();
   }
 

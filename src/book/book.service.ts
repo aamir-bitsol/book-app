@@ -7,6 +7,7 @@ import { EventsService } from 'src/event_service/event_service.service';
 import { User } from 'src/user/user.entity';
 import { Comment as Comment } from 'src/comments/comments.entity';
 import { Review } from 'src/reviews/reviews.entity';
+import { MyLoggerService } from 'src/mylogger/mylogger.service';
 
 @Injectable()
 export class BookService {
@@ -19,7 +20,7 @@ export class BookService {
     private readonly reviewRepository: Repository<Review>,
     private readonly eventsService: EventsService,
   ) {}
-
+    private logger = new MyLoggerService(BookService.name);
   async createBook(book: CreateBookDto): Promise<any> {
     const authors: Array<number> = book.author;
     const userObj: User[] = await this.userRepository.find({
@@ -45,6 +46,7 @@ export class BookService {
   }
 
   async getAllBooks(): Promise<any> {
+    this.logger.error('Get All Books API Called')
     const allBooks: Book[] = await this.bookRepository.find({
       relations: ['author', 'comments', 'reviews'],
     });

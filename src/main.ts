@@ -3,13 +3,15 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser'
 import * as express from 'express';
+import { MyLoggerService } from './mylogger/mylogger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create(AppModule, { bodyParser: true, logger: new MyLoggerService("") });
   app.use('/files', express.static('./files'))
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.text({ type: 'text/html' }));
   app.use(bodyParser.json());
+  app.useLogger(app.get(MyLoggerService));
   const config = new DocumentBuilder()
     .setTitle('Book User App')
     .setDescription('This App contains Books, Users and their relation')

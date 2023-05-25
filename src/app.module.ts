@@ -17,6 +17,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { UserMiddleware, UserMiddlewareFunction } from './middleware/user.middleware';
 import { UserController } from './user/user.controller';
+import { MyLoggerModule } from './mylogger/mylogger.module';
 
 @Module({
   imports: [
@@ -47,11 +48,13 @@ import { UserController } from './user/user.controller';
     LikesModule,
     EventServiceModule,
     ReviewsModule,
+    MyLoggerModule,
     ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
+  
   configure(consumer: MiddlewareConsumer) {
       // consumer.apply(UserMiddleware).forRoutes({path: 'user', method: RequestMethod.GET})
       consumer.apply(UserMiddleware).exclude(
