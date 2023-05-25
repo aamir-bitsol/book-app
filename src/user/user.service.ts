@@ -6,6 +6,7 @@ import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { EventsService } from 'src/event_service/event_service.service';
 import { dUser } from './user.decorator';
+import { MyLoggerService } from 'src/mylogger/mylogger.service';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly eventsService: EventsService,
   ) {}
+  private readonly logger = new MyLoggerService(UserService.name);
 
   async createUser(user: CreateUserDto, image): Promise<any> {
     const username: string = user.username;
@@ -41,6 +43,7 @@ export class UserService {
   }
 
   async getAllUsers(page: number, pageSize: number, name: any): Promise<any> {
+    this.logger.log("Get All User API Called")
     // const page: number = parseInt(req.query.page) || 1;
     // const pageSize: number = parseInt(req.query.pageSize) || 10;
     console.log(name);
