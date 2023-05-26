@@ -13,6 +13,7 @@ import {
   ParseIntPipe,
   Query,
   ValidationPipe,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto, CreateUserDto } from './user.dto';
@@ -30,7 +31,6 @@ import { FileUploadValidator } from './file.validator';
 import { diskStorage } from 'multer';
 import path from 'path';
 import { CustomInterceptors } from './custom.interceptor';
-import { dUser } from './user.decorator';
 
 
 @ApiTags('User')
@@ -40,13 +40,14 @@ export class UserController {
     private readonly userService: UserService,
     @Inject(FileUploadValidator)
     private readonly fileValidator: FileUploadValidator,
-  ) {}
+  ) { }
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of users' })
   @Get()
-  async getAllUsers(@Query('page', ParseIntPipe) page: number=1,@dUser(new ValidationPipe({validateCustomDecorators:true}), ParseIntPipe) user, @Query('pageSize', ParseIntPipe) pageSize: number=10) {
-    return await this.userService.getAllUsers(page, pageSize, user);
+  async getAllUsers(@Query('page', ParseIntPipe) page: number = 1, @Query('pageSize', ParseIntPipe) pageSize: number = 10, @Req() req) {
+    console.log(req.csrfToken())
+    return await this.userService.getAllUsers(page, pageSize);
   }
 
   @ApiOperation({ summary: 'Get a specific users' })
@@ -91,9 +92,9 @@ export class UserController {
           );
         },
       }),
-      fileFilter: (req, file,callBack)=>{
+      fileFilter: (req, file, callBack) => {
         console.log(file.originalname)
-        if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)){
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
           return callBack(new Error('Only image files are allowed!'), false);
         }
         callBack(null, true);

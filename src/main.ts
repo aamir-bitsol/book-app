@@ -3,9 +3,40 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser'
 import * as express from 'express';
+import helmet from 'helmet';
+import csurf from 'csurf';
+import cookieParser from 'cookie-parser';
+import { Pool } from 'pg';
+import session from 'express-session';
+
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create(AppModule, { bodyParser: false, cors: true });
+  app.use(helmet());
+  app.use(cookieParser());
+  const expressSession = require('express-session');
+  const pgSession = require('connect-pg-simple')(expressSession);
+  const pgPool = new Pool({
+    host: 'localhost',
+    database: 'booksdb',
+    password: "root",
+    user: 'postgres',
+    port: 5432,
+  })
+  app.use(session({
+    name: 'NESTJS_SESSION_ID',
+    secret: process.env.MY_SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    store: new pgSession({
+      pool: pgPool,
+      tableName: 'sessions',
+    }),
+    cookie: {
+      maxAge: 60000,
+    }
+  }))
+  app.use(csurf());
   app.use('/files', express.static('./files'))
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.text({ type: 'text/html' }));
