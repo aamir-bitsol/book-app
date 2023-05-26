@@ -7,8 +7,7 @@ import {
   AfterLoad,
   AfterInsert,
   AfterUpdate,
-  JoinColumn,
-  JoinTable,
+  CreateDateColumn,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { Book } from 'src/book/book.entity';
@@ -58,4 +57,19 @@ export class User {
       this.reviews = [];
     }
   }
+}
+
+
+@Entity()
+export class Sessions {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column({unique: true})
+  sid: string;
+  @CreateDateColumn()
+  expire: string;
+  @Column({nullable:true})
+  json: string;
+  @Column()
+  sess: string;
 }
