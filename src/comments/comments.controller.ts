@@ -8,6 +8,7 @@ import {
   Param,
   Request,
   UseGuards,
+  Session,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDTO, UpdateCommentDTO } from './comments.dto';
@@ -40,7 +41,11 @@ export class CommentsController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async createComment(@Body() commentData: CreateCommentDTO, @Request() req) {
+  async createComment(
+    @Body() commentData: CreateCommentDTO,
+    @Session() session: Record<string, any>,
+    @Request() req,
+  ) {
     return this.commentService.createComment(commentData);
   }
 
