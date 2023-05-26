@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser'
 import * as express from 'express';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
+  app.use(helmet());
   app.use('/files', express.static('./files'))
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.text({ type: 'text/html' }));
